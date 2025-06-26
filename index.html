@@ -1,0 +1,984 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Scale Fractal Framework: Temporal-Spatial Architecture</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 30% 20%, #1a0d2e 0%, #0a0514 50%, #000000 100%);
+            color: #e0e6ed;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .cosmic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeInDown 1s ease-out;
+        }
+        
+        .header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a9c0;
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        /* DAG Visualization */
+        .dag-container {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            margin: 4rem auto;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            animation: pulseGlow 4s infinite ease-in-out;
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 50px rgba(102, 126, 234, 0.2); }
+            50% { box-shadow: 0 0 100px rgba(102, 126, 234, 0.4); }
+        }
+        
+        .temporal-axis {
+            position: absolute;
+            left: 50%;
+            top: 10%;
+            height: 80%;
+            width: 2px;
+            background: linear-gradient(to bottom, #667eea, #764ba2, #f093fb);
+            transform: translateX(-50%);
+            opacity: 0.6;
+        }
+        
+        .temporal-labels {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            opacity: 0.6;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            color: #a0a9c0;
+        }
+        
+        .stage {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .stage:hover {
+            transform: scale(1.1) translateZ(20px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .stage.active {
+            transform: scale(1.15);
+            z-index: 10;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .stage-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            filter: drop-shadow(0 0 10px currentColor);
+        }
+        
+        .stage-name {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .stage-subtitle {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+        
+        /* Stage Positions */
+        .stage-random {
+            top: 15%;
+            left: 10%;
+            background: radial-gradient(circle, rgba(255, 107, 107, 0.3), rgba(255, 107, 107, 0.1));
+            color: #ff6b6b;
+            animation-delay: 0s;
+        }
+        
+        .stage-weekly {
+            top: 30%;
+            left: 25%;
+            background: radial-gradient(circle, rgba(74, 144, 226, 0.3), rgba(74, 144, 226, 0.1));
+            color: #4a90e2;
+            animation-delay: 1s;
+        }
+        
+        .stage-strategic {
+            top: 45%;
+            left: 15%;
+            background: radial-gradient(circle, rgba(126, 87, 194, 0.3), rgba(126, 87, 194, 0.1));
+            color: #7e57c2;
+            animation-delay: 2s;
+        }
+        
+        .stage-operational {
+            top: 50%;
+            left: 50%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.3), rgba(102, 126, 234, 0.1));
+            color: #667eea;
+            transform: translate(-50%, -50%);
+            animation-delay: 3s;
+        }
+        
+        .stage-existential {
+            top: 70%;
+            left: 75%;
+            background: radial-gradient(circle, rgba(240, 147, 251, 0.3), rgba(240, 147, 251, 0.1));
+            color: #f093fb;
+            animation-delay: 4s;
+        }
+        
+        /* Flow Lines */
+        .flow-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.6), transparent);
+            height: 2px;
+            animation: flow 2s ease-in-out infinite;
+            z-index: 1;
+        }
+        
+        .flow-random-operational {
+            top: 25%;
+            left: 20%;
+            width: 25%;
+            transform: rotate(35deg);
+            animation-delay: 0s;
+        }
+        
+        .flow-weekly-operational {
+            top: 40%;
+            left: 35%;
+            width: 20%;
+            transform: rotate(20deg);
+            animation-delay: 0.5s;
+        }
+        
+        .flow-strategic-operational {
+            top: 47%;
+            left: 25%;
+            width: 20%;
+            transform: rotate(5deg);
+            animation-delay: 1s;
+        }
+        
+        .flow-operational-existential {
+            top: 60%;
+            left: 55%;
+            width: 25%;
+            transform: rotate(20deg);
+            animation-delay: 1.5s;
+        }
+        
+        .flow-existential-operational {
+            top: 65%;
+            left: 60%;
+            width: 20%;
+            transform: rotate(-45deg);
+            background: linear-gradient(90deg, transparent, rgba(240, 147, 251, 0.6), transparent);
+            animation-delay: 2s;
+        }
+        
+        @keyframes flow {
+            0% { opacity: 0; transform: scaleX(0); }
+            50% { opacity: 1; transform: scaleX(1); }
+            100% { opacity: 0; transform: scaleX(0); }
+        }
+        
+        /* Detail Panel */
+        .detail-panel {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 500px;
+            height: 100vh;
+            background: rgba(10, 5, 20, 0.95);
+            backdrop-filter: blur(30px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            z-index: 1000;
+            transition: right 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+        
+        .detail-panel.active {
+            right: 0;
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .detail-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .detail-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .detail-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #764ba2;
+        }
+        
+        .detail-section p {
+            line-height: 1.6;
+            color: #a0a9c0;
+        }
+        
+        /* Staged Sections */
+        .section {
+            margin: 3rem 0;
+            padding: 2.5rem;
+            background: rgba(16, 20, 31, 0.6);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            animation: fadeInDown 1s ease-out;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+        
+        .section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section h3 {
+            font-size: 1.3rem;
+            margin: 2rem 0 1rem 0;
+            color: #a0a6b8;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.3);
+            padding-bottom: 0.5rem;
+        }
+        
+        .highlight {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        
+        .quote {
+            font-style: italic;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid #667eea;
+            border-radius: 0 15px 15px 0;
+            position: relative;
+        }
+        
+        .quote::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: -5px;
+            font-size: 4rem;
+            color: #667eea;
+            opacity: 0.3;
+        }
+        
+        .framework-structure {
+            font-family: 'Inter', monospace;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e6ed;
+            padding: 2.5rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            animation: fadeInDown 1s ease-out;
+        }
+        
+        .framework-structure::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #667eea, transparent);
+        }
+        
+        .framework-structure strong {
+            color: #667eea;
+            font-size: 1.1rem;
+            display: block;
+            margin: 1.5rem 0 0.5rem 0;
+        }
+        
+        .framework-structure strong:first-child {
+            margin-top: 0;
+        }
+        
+        /* Navigation */
+        .navigation {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            background: rgba(10, 5, 20, 0.8);
+            padding: 1rem;
+            border-radius: 2rem;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            background: none;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .nav-btn:hover, .nav-btn.active {
+            border-color: #764ba2;
+            background: rgba(118, 75, 162, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* DAG Legend */
+        .dag-legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(16, 20, 31, 0.8);
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            backdrop-filter: blur(20px);
+            font-size: 0.8rem;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.3rem 0;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        
+        .legend-item:hover, .legend-item.touched {
+            transform: translateX(5px);
+            opacity: 0.9;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .video-preview {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            width: 200px;
+            height: 112.5px;
+            border-radius: 10px;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 20;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+        }
+        
+        .legend-item:hover .video-preview, .legend-item.touched .video-preview {
+            transform: translateX(-50%) scale(1);
+            opacity: 1;
+        }
+        
+        .video-preview iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(16, 20, 31, 0.8);
+            border-radius: 20px;
+            margin: 4rem 0 2rem 0;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            animation: fadeInDown 1s ease-out;
+        }
+        
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer a:hover {
+            color: #f093fb;
+            text-shadow: 0 0 10px rgba(240, 147, 251, 0.5);
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .stage {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .stage-icon {
+                font-size: 2rem;
+            }
+            
+            .stage-name {
+                font-size: 0.9rem;
+            }
+            
+            .stage-subtitle {
+                font-size: 0.7rem;
+            }
+            
+            .detail-panel {
+                width: 100vw;
+            }
+            
+            .dag-container {
+                height: 80vh;
+            }
+            
+            .video-preview {
+                width: 80%;
+                height: auto;
+                aspect-ratio: 16/9;
+                left: 50%;
+                bottom: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmic-bg" id="cosmicBg"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>Multi-Scale Fractal Framework</h1>
+            <p class="subtitle">Temporal-Spatial Architecture for Organizational Signal Processing</p>
+        </div>
+        
+        <!-- DAG Visualization -->
+        <div class="dag-container">
+            <div class="temporal-axis"></div>
+            <div class="temporal-labels">TIME SCALES</div>
+            
+            <div class="stage stage-random" data-stage="random">
+                <div class="stage-icon">🔥</div>
+                <div class="stage-name">Tactical</div>
+                <div class="stage-subtitle">Random</div>
+            </div>
+            
+            <div class="stage stage-weekly" data-stage="weekly">
+                <div class="stage-icon">📊</div>
+                <div class="stage-name">Informational</div>
+                <div class="stage-subtitle">Weekly</div>
+            </div>
+            
+            <div class="stage stage-strategic" data-stage="strategic">
+                <div class="stage-icon">🧠</div>
+                <div class="stage-name">Strategic</div>
+                <div class="stage-subtitle">Quarterly</div>
+            </div>
+            
+            <div class="stage stage-operational" data-stage="operational">
+                <div class="stage-icon">⚙️</div>
+                <div class="stage-name">Operational</div>
+                <div class="stage-subtitle">Daily</div>
+            </div>
+            
+            <div class="stage stage-existential" data-stage="existential">
+                <div class="stage-icon">🌌</div>
+                <div class="stage-name">Existential</div>
+                <div class="stage-subtitle">Perpetual</div>
+            </div>
+            
+            <!-- Flow Lines -->
+            <div class="flow-line flow-random-operational"></div>
+            <div class="flow-line flow-weekly-operational"></div>
+            <div class="flow-line flow-strategic-operational"></div>
+            <div class="flow-line flow-operational-existential"></div>
+            <div class="flow-line flow-existential-operational"></div>
+            
+            <div class="dag-legend">
+                <div class="legend-item" data-video="tactical">
+                    <div class="legend-color" style="background: #ff6b6b;"></div>
+                    <span>Tactical (Random)</span>
+                    <div class="video-preview">
+                        <iframe src="https://www.youtube.com/embed/42CM3zpY3Ic?mute=1&loop=1&playlist=42CM3zpY3Ic&start=0&end=5" allow="autoplay"></iframe>
+                    </div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4a90e2;"></div>
+                    <span>Informational (Weekly)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #7e57c2;"></div>
+                    <span>Strategic (Quarterly)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #667eea;"></div>
+                    <span>Operational (Daily)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f093fb;"></div>
+                    <span>Existential (Perpetual)</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="detail-panel" id="detailPanel">
+            <div class="detail-header">
+                <div class="detail-title" id="detailTitle">
+                    <span id="detailIcon">🔥</span>
+                    <span id="detailName">Tactical</span>
+                </div>
+                <button class="close-btn" onclick="closeDetail()">×</button>
+            </div>
+            <div class="detail-section">
+                <h3>Interpretation</h3>
+                <p id="detailInterpretation"></p>
+            </div>
+            <div class="detail-section">
+                <h3>Opinion</h3>
+                <p id="detailOpinion"></p>
+            </div>
+            <div class="detail-section">
+                <h3>Resonance</h3>
+                <p id="detailResonance"></p>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <button class="nav-btn active" onclick="setView('dag')">DAG View</button>
+            <button class="nav-btn" onclick="setView('journey')">Journey Mode</button>
+            <button class="nav-btn" onclick="setView('cycle')">Cycle View</button>
+        </div>
+
+        <br> <br> <br> <br> <br> <br> <br> <br> <br>
+        <br> <br> <br> <br> <br> <br> <br> <br> <br>
+        <br> <br> <br> <br> <br> <br> <br> <br> <br>
+        <br> <br> <br> <br> <br> <br> <br> <br> <br>
+        <br> <br> <br> <br> <br> <br> <br> <br> <br>
+        <br> <br> <br> <br> <br> <br> <br> <br> <br>
+        <br> <br> <br> <br> <br> <br> <br> <br> <br>
+        <br> <br> <br> <br> <br> <br> <br> <br> <br>
+        <br> <br> <br> <br> <br> <br> <br> <br> <br>
+        
+        <div class="section fractal-core">
+            <h2><span class="stage-icon">🌊</span> The Core Fractal Structure</h2>
+            <div class="framework-structure">
+                <strong>Signal Processing Architecture:</strong>
+                🌊 Nafuuna, Heritage, Roots → Inheritance: .md<br>
+                ❤️ Salary, Commons, Trunk → Bequest: .yml<br>
+                🌀 Ebbaala, Faustian/Trust, Fork → Strategic: .py<br>
+                🐬 Mpoomerwe, Linear, Branching → Motive: .html<br>
+                🔁 Kujooga, Workers, Canopy → Perpetuity: .flask<br>
+                
+                <strong>Technical Implementation:</strong>
+                🌊 Data Foundation: .csv, .dta → Cultural memory encoding<br>
+                ❤️ Individual Identity: isid id → Resource allocation mechanisms<br>
+                🌀 Logic <a href="">Operations</a>: foreach, if, while → Decision tree processing<br>
+                🐬 Group Analytics: bys var: egen → Collective pattern recognition<br>
+                🔁 Output Generation: .xlsx, .png → Feedback loop validation<br>
+                
+                <strong>Temporal-Spatial Mapping:</strong>
+                🌊 Existential (Perpetual) → Why we exist in spacetime<br>
+                ❤️ Strategic (Quarterly) → What resources sustain us<br>
+                🌀 Informational (Weekly) → What signals guide decisions<br>
+                🐬 Operational (Daily) → What actions move us forward<br>
+                🔁 Tactical (Random) → What immediate responses emerge
+            </div>
+            
+            <p>This fractal represents the <span class="highlight">fundamental architecture of consciousness itself</span> - how any complex system processes information across multiple temporal scales while maintaining coherence in spacetime. It's the unified field theory of organizational intelligence.</p>
+            
+            <div class="quote">
+                "A fractal is upon us that scales from philosophy to business to everywhere—This fractal scales and generalizes like nothing before it!"
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2><span class="stage-icon">⚡</span> The Temporal-Spatial Revolution</h2>
+            <p>The breakthrough isn't just the DAG structure—it's recognizing that <span class="highlight">operational reality is where all temporal scales collapse into a single point of spacetime</span>. Every operational decision simultaneously:</p>
+            
+            <ul style="margin: 1.5rem 0; padding-left: 2rem; line-height: 1.8;">
+                <li><strong>Inherits</strong> from existential purpose (the eternal "why")</li>
+                <li><strong>Integrates</strong> strategic frameworks (quarterly rhythms)</li>
+                <li><strong>Processes</strong> informational signals (weekly patterns)</li>
+                <li><strong>Responds</strong> to tactical chaos (random disruptions)</li>
+                <li><strong>Generates</strong> existential feedback (validating or invalidating core assumptions)</li>
+            </ul>
+            
+            <h3>The Spacetime Collapse</h3>
+            <p>This is why entrepreneurship feels like <span class="highlight">temporal vertigo</span>—you're literally operating at the point where multiple time dimensions intersect with spatial reality. The operational node isn't just a process; it's a <span class="highlight">dimensional gateway</span> where abstract becomes concrete, where potential becomes actual.</p>
+            
+            <h3>The Feedback Spiral</h3>
+            <p>The existential feedback loop creates a <span class="highlight">reality validation engine</span>. Every operational outcome tests whether your existential assumptions align with how the universe actually works. This is why some startups pivot and others die—they're testing fundamental hypotheses about reality itself.</p>
+        </div>
+        
+        <div class="section">
+            <h2><span class="stage-icon">💡</span> The Noise-Signal Gradient</h2>
+            <p>The fractal ultimately describes the <span class="highlight">noise-signal gradient that biology itself depends upon</span>. Each temporal scale acts as a different frequency filter:</p>
+            
+            <div class="framework-structure">
+                <strong>Frequency Domain Analysis:</strong><br>
+                Tactical (Random) → High frequency, low amplitude<br>
+                - Noise: Daily chaos, urgent interruptions<br>
+                - Signal: Patterns in the randomness, adaptive responses<br><br>
+                
+                Informational (Weekly) → Medium frequency, medium amplitude<br>
+                - Noise: Data overload, false correlations<br>
+                - Signal: Meaningful trends, validated insights<br><br>
+                
+                Strategic (Quarterly) → Low frequency, high amplitude<br>
+                - Noise: Market fluctuations, competitive reactions<br>
+                - Signal: Structural shifts, strategic opportunities<br><br>
+                
+                Existential (Perpetual) → Ultra-low frequency, maximum amplitude<br>
+                - Noise: Cultural fads<br>
+                - Signal: Universal principles, enduring purpose<br><br>
+                
+                Operational (Daily) → INTEGRATION FREQUENCY<br>
+                - Where all signals converge and noise gets filtered<br>
+                - The temporal-spatial collapse point<br>
+                - Reality's truth function
+            </div>
+            
+            <p>This is why <span class="highlight">operational excellence is existential validation</span>. If your daily operations can't coherently integrate signals from all temporal scales, your fundamental assumptions about reality are wrong.</p>
+        </div>
+        
+        <div class="section">
+            <h2><span class="stage-icon">🎯</span> The Architecture of Consciousness</h2>
+            <p>We've discovered something unprecedented: <span class="highlight">the mathematical structure of how consciousness processes reality across multiple dimensions</span>. This isn't just organizational theory—it's the fundamental architecture that any complex system uses to maintain coherence while adapting to environmental change.</p>
+            
+            <p>The fractal works because it mirrors the <span class="highlight">universal pattern of how information becomes reality</span>:</p>
+            
+            <div class="quote">
+                "Every complex system—from biological organisms to business organizations to individual consciousness—must solve the same fundamental problem: How do you maintain identity while adapting to changing environments? How do you preserve essential patterns while adapting to changing environments? How do you process infinite noise to extract meaningful signals?"
+            </div>
+            
+            <p>This framework provides the answer: through <span class="highlight">multi-scale temporal processing with operational integration points</span>. It's the architecture of life itself.</p>
+        </div>
+        
+        <div class="footer">
+            "The <a href="https://abikesa.github.io/invocation/">noise</a><a href="https://abikesa.github.io/crazysexycool/">-</a><a href="https://abikesa.github.io/foraging/">signal</a> gradient that much of biology depends upon"<br>
+            <em>A complete exchange on the <a href="https://github.com/abikesa/enterprise">temporal</a><a href="https://abikesa.github.io/ubuntu-dev/love">-</a><a href="https://abikesa.github.io/si/love">spatial</a> <a href="https://abikesa.github.io/founder/">architecture</a> of consciousness</em>
+        </div>
+    </div>
+    
+    <script>
+        const stageData = {
+            random: {
+                icon: '🔥',
+                name: 'Tactical',
+                subtitle: 'Random',
+                interpretation: 'The high-frequency chaos of immediate action. Tactical responses handle urgent, unpredictable disruptions, finding patterns in randomness to maintain system stability.',
+                opinion: 'This is where agility lives. Most systems overplan and choke here, but embracing the chaos is key. It’s not noise—it’s raw potential waiting for structure.',
+                resonance: 'Like lightning striking in a storm—unpredictable, yet illuminating. The spark that forces adaptation or collapse.'
+            },
+            weekly: {
+                icon: '📊',
+                name: 'Informational',
+                subtitle: 'Weekly',
+                interpretation: 'The medium-frequency layer where data becomes insight. Weekly cycles filter noise to reveal trends, guiding decisions with validated patterns.',
+                opinion: 'This is the brain’s sorting mechanism. Ignore it, and you drown in data. Over-rely on it, and you miss the bigger picture. Balance is everything.',
+                resonance: 'The rhythm of a heartbeat, steady but adaptive, turning raw input into meaningful signals for the system to act upon.'
+            },
+            strategic: {
+                icon: '🧠',
+                name: 'Strategic',
+                subtitle: 'Quarterly',
+                interpretation: 'Low-frequency planning that aligns resources with long-term goals. Strategic cycles identify structural shifts and opportunities amidst market noise.',
+                opinion: 'Most organizations fetishize strategy but fail to ground it. It’s only as good as its execution in the operational layer. Vision without action is just dreaming.',
+                resonance: 'The slow, deliberate breath of a system—knowing when to pivot, when to persist, and when to redefine the game entirely.'
+            },
+            operational: {
+                icon: '⚙️',
+                name: 'Operational',
+                subtitle: 'Daily',
+                interpretation: 'The integration point where all temporal scales converge. Daily operations collapse existential purpose, strategic plans, informational signals, and tactical responses into actionable reality.',
+                opinion: 'This is the crucible. If your operations don’t sing, your system is dead. It’s where theory meets reality, and only the truth survives.',
+                resonance: 'The pulse of existence itself—every action a test of alignment with the universe’s deeper patterns.'
+            },
+            existential: {
+                icon: '🌌',
+                name: 'Existential',
+                subtitle: 'Perpetual',
+                interpretation: 'The ultra-low-frequency layer of purpose and identity. Existential signals define why the system exists and provide feedback to validate or challenge core assumptions.',
+                opinion: 'This is the soul of any system. Lose this, and you’re just a machine grinding toward obsolescence. It’s the hardest to articulate but the easiest to feel when it’s right.',
+                resonance: 'The cosmic hum of the universe, whispering why you exist and daring you to align with it.'
+            }
+        };
+        
+        let currentView = 'dag';
+        let currentStage = null;
+        
+        // Create cosmic background
+        function createStars() {
+            const cosmicBg = document.getElementById('cosmicBg');
+            for (let i = 0;  i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 3 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 3 + 's';
+                cosmicBg.appendChild(star);
+            }
+        }
+        
+        // Stage interaction
+        document.querySelectorAll('.stage').forEach(stage => {
+            stage.addEventListener('click', () => {
+                const stageType = stage.dataset.stage;
+                openDetail(stageType);
+            });
+            
+            stage.addEventListener('mouseenter', () => {
+                stage.classList.add('active');
+            });
+            
+            stage.addEventListener('mouseleave', () => {
+                stage.classList.remove('active');
+            });
+        });
+        
+        // Legend interaction
+        document.querySelectorAll('.legend-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                item.classList.add('touched');
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                item.classList.remove('touched');
+            });
+            
+            item.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const isTouched = item.classList.contains('touched');
+                document.querySelectorAll('.legend-item').forEach(i => i.classList.remove('touched'));
+                if (!isTouched) {
+                    item.classList.add('touched');
+                }
+            });
+            
+            item.addEventListener('click', (e) => {
+                const video = item.dataset.video;
+                if (video === 'tactical') {
+                    window.open('https://www.youtube.com/watch?v=42CM3zpY3Ic', '_blank');
+                }
+            });
+        });
+        
+        function openDetail(stageType) {
+            const data = stageData[stageType];
+            document.getElementById('detailIcon').textContent = data.icon;
+            document.getElementById('detailName').textContent = data.name;
+            document.getElementById('detailInterpretation').textContent = data.interpretation;
+            document.getElementById('detailOpinion').textContent = data.opinion;
+            document.getElementById('detailResonance').textContent = data.resonance;
+            document.getElementById('detailPanel').classList.add('active');
+            currentStage = stageType;
+        }
+        
+        function closeDetail() {
+            document.getElementById('detailPanel').classList.remove('active');
+            currentStage = null;
+        }
+        
+        function setView(view) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            currentView = view;
+            
+            const container = document.querySelector('.dag-container');
+            container.style.transform = view === 'cycle' ? 'rotate(360deg)' : 'rotate(0deg)';
+            container.style.transition = 'transform 2s ease-in-out';
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeDetail();
+            
+            const stages = ['random', 'weekly', 'strategic', 'operational', 'existential'];
+            if (currentStage && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+                const currentIndex = stages.indexOf(currentStage);
+                const nextIndex = e.key === 'ArrowRight' 
+                    ? (currentIndex + 1) % stages.length
+                    : (currentIndex - 1 + stages.length) % stages.length;
+                openDetail(stages[nextIndex]);
+            }
+        });
+        
+        // Initialize
+        createStars();
+        
+        // Dynamic stage animations
+        setInterval(() => {
+            const stages = document.querySelectorAll('.stage');
+            stages.forEach((stage, index) => {
+                setTimeout(() => {
+                    stage.style.transform += ' rotate(360deg)';
+                    setTimeout(() => {
+                        stage.style.transform = stage.style.transform.replace(' rotate(360deg)', '');
+                    }, 1000);
+                }, index * 200);
+            });
+        }, 15000);
+    </script>
+</body>
+</html>
